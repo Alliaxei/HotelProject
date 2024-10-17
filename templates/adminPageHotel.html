@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminPanel</title>
+    <style>
+        .header {
+            margin-top: 2px;
+            position: sticky;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #3b3b3b;
+            padding: 10px;
+            color: #e1e1e1;
+            height: 30px;
+            border-radius: 10px;
+            z-index: 3;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #dcdcdc;
+        }
+
+        .header a {
+            color: #dadada;
+            transition: color 0.3s;
+        }
+
+        .header a:hover {
+            color: #e6e6e6;
+        }
+
+        .header .left {
+            position: absolute;
+            left: 10px;
+        }
+
+        .header .right {
+            position: absolute;
+            right: 10px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #ececec;
+        }
+        h2 {
+            text-align: center;
+            color: #292929;
+            font-size: 20px;
+        }
+
+        main {
+            margin: 40px;
+        }
+
+        .main-content-header {
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        section {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2e2e2e;
+        }
+        section:last-child {
+            border-bottom: none;
+        }
+
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .info-box {
+            width: 85%;
+            height: 300px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 20px;
+            color: #282828;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(153, 153, 153, 0.5);
+        }
+
+        .info-box-wide {
+            width: 100%;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            margin-right: 40px;
+            padding: 25px 2px;
+            margin-left: 20px;
+            min-width: 260px;
+            background-color: #272727;
+            color: #e1e1e1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            font-size: 18px;
+        }
+
+        .action-button:hover {
+            background-color: #666666;
+            color: #f0f0f0;
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .data-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .table-container {
+            max-height: 310px;
+            overflow-y: auto;
+            width: 100%;
+            position: relative;
+        }
+
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #f2f2f2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: relative;
+            left: 47%;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .modal-content label,
+        .modal-content input,
+        .modal-content select,
+        .modal-content button {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 10px;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            padding: 10px;
+            border: 1px solid #000;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content button {
+            background-color: #272727;
+            color: #e1e1e1;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .modal-content button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .modal-content button:enabled:hover {
+            background-color: #666666;
+        }
+
+        .modal-content button:enabled:active {
+            transform: scale(0.95);
+        }
+
+        .form-header {
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .edit-button {
+            background-color: #272727;
+            color: #e1e1e1;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            width: 150px;
+            margin: 3px;
+        }
+
+        .edit-button:hover {
+            background-color: #666666;
+        }
+
+        .edit-button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="left">На главную</a>
+        <h1 class="center">Панель администратора</h1>
+        <a href="/logout" class="right">Выйти из аккаунта</a>
+    </header>
+    <main>
+        <section>
+            <h2 class="sectionHeader">Управление номерами</h2>
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Корпус</th>
+                                    <th>Этаж</th>
+                                    <th>Тип узла</th>
+                                    <th>Количество мест</th>
+                                    <th>Категория</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in rooms %}
+                                    <tr>
+                                        <td>{{ item.room_number }}</td>
+                                        <td>{{ item.building }}</td>
+                                        <td>{{ item.floor }}</td>
+                                        <td>{{ item.bathRoomType }}</td>
+                                        <td>{{ item.numberOfSeats }}</td>
+                                        <td>{{ item.get_category_display }}</td>
+                                        <td>
+                                            <button class="edit-button" data-room-id="{{ item.id }}">Редактировать</button>
+                                            <form action="{% url 'delete_room' item.id %}" method="post" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="edit-button">Удалить</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="action-button" id="addRoomButton">Добавить номер</button>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="sectionHeader">Управление сотрудниками</h2>
+            <div class="info-section">
+                <div class="info-box">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Логин</th>
+                                    <th>Права администратора</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in users %}
+                                    <tr>
+                                        <td>{{ item.login }}</td>
+                                        <td>{{ item.is_superuser|yesno:"Да,Нет" }}</td>
+                                        <td></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="action-button" id="addUserButton">Добавить сотрудника</button>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="sectionHeader">Отчёты</h2>
+            <div class="info-section">
+                <div class="info-box info-box-wide">
+                    <p>Статистика использования номеров (данные из БД)</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for adding a user -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="form-header">Добавление нового пользователя</h2>
+            <form id="addUserForm">
+                <input type="text" id="login" name="login" placeholder="Введите логин"><br><br>
+                <input type="password" id="password" name="password" placeholder="Введите пароль"><br><br>
+                <label for="is_superuser">Права администратора:</label>
+                <select id="is_superuser" name="is_superuser">
+                    <option value="true">Да</option>
+                    <option value="false">Нет</option>
+                </select><br><br>
+                <button type="submit" id="submitButton" disabled>Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for adding a room -->
+<div id="addRoomModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="form-header">Добавление нового номера</h2>
+        <form id="addRoomForm" method="post" action="{% url 'add_room' %}">
+            {% csrf_token %}
+            <input type="number" id="add-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
+            <input type="text" id="add-building" name="building" placeholder="Введите корпус" required><br><br>
+            <input type="number" id="add-floor" name="floor" placeholder="Введите этаж" required><br><br>
+            <input type="text" id="add-bathroom-type" name="bathRoomType" placeholder="Введите тип узла" required><br><br>
+            <input type="number" id="add-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
+            <label for="add-room-category">Категория:</label>
+            <select id="add-room-category" name="room_category" required>
+                <option value="economy">Эконом</option>
+                <option value="standart">Стандарт</option>
+                <option value="luxury">Люкс</option>
+            </select><br><br>
+            <button type="submit" id="submitButtonRoom" disabled>Добавить номер</button>
+        
+            {% if form.errors %}
+                <div class="form-errors">
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            <li>{{ field }}: {{ errors|join:", " }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+    <!-- Modal for editing a room -->
+    <div id="editRoomModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="form-header" id="text-header-edit-room">Редактирование номера</h2>
+            <form id="editRoomForm" method="post" action="{% url 'edit_room' %}">
+                {% csrf_token %}
+                <input type="hidden" id="edit-room-id" name="room_id">
+                <input type="text" id="edit-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
+                <input type="text" id="edit-building" name="building" placeholder="Введите корпус" required><br><br>
+                <input type="text" id="edit-floor" name="floor" placeholder="Введите этаж" required><br><br>
+                <input type="text" id="edit-bathroom-type" name="bathRoomType" placeholder="Введите тип узла" required><br><br>
+                <input type="number" id="edit-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
+                <label for="edit-room-category">Категория:</label>
+                <select id="edit-room-category" name="room_category" required>
+                    <option value="economy">Эконом</option>
+                    <option value="standart">Стандарт</option>
+                    <option value="luxury">Люкс</option>
+                </select><br><br>
+                <button type="submit" id="submitButtonEditRoom" disabled>Редактировать номер</button>
+            </form>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function toggleModal(modal, action) {
+            modal.style.display = action;
+        }
+
+        function validateForm(form, fields) {
+            let formIsValid = true;
+            fields.forEach(field => {
+                if (!form[field].value.trim()) {
+                    formIsValid = false;
+                    alert(`Поле ${field} не может быть пустым!`);
+                }
+            });
+            return formIsValid;
+        }
+
+        const addRoomModal = document.getElementById('addRoomModal');
+        const editRoomModal = document.getElementById('editRoomModal');
+        const submitButtonRoom = document.getElementById('submitButtonRoom');
+        const submitButtonEditRoom = document.getElementById('submitButtonEditRoom');
+        
+        const addRoomInputs = document.querySelectorAll("#addRoomForm input, #addRoomForm select");
+        const editRoomInputs = document.querySelectorAll("#editRoomForm input, #editRoomForm select");
+
+        document.getElementById('addRoomButton').addEventListener('click', function() {
+            toggleModal(addRoomModal, 'block');
+            validateAddRoomForm();
+        });
+
+        const closeButtons = document.querySelectorAll('.close');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                toggleModal(addRoomModal, 'none');
+                toggleModal(editRoomModal, 'none');
+            });
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === addRoomModal) {
+                toggleModal(addRoomModal, 'none');
+            }
+            if (event.target === editRoomModal) {
+                toggleModal(editRoomModal, 'none');
+            }
+        });
+
+        document.querySelectorAll('.edit-button').forEach(button => {
+            button.addEventListener('click', function(event) {
+                toggleModal(editRoomModal, 'block');
+
+                const roomId = button.getAttribute('data-room-id');
+                document.getElementById('edit-room-id').value = roomId;
+
+                // Здесь можно загрузить и заполнить остальные поля формы, используя AJAX
+                // Например:
+                // fetch(`/get_room_data/${roomId}`)
+                //     .then(response => response.json())
+                //     .then(data => {
+                //         document.getElementById('edit-room-number').value = data.room_number;
+                //         // Заполните остальные поля...
+                //     });
+
+                validateEditRoomForm();
+            });
+        });
+
+        function validateAddRoomForm() {
+            let allFilled = Array.from(addRoomInputs).every(input => input.value.trim());
+            submitButtonRoom.disabled = !allFilled;
+        }
+
+        addRoomInputs.forEach(input => input.addEventListener('input', validateAddRoomForm));
+
+        function validateEditRoomForm() {
+            let allFilled = Array.from(editRoomInputs).every(input => input.value.trim());
+            submitButtonEditRoom.disabled = !allFilled;
+        }
+
+        editRoomInputs.forEach(input => input.addEventListener('input', validateEditRoomForm));
+
+        document.getElementById('addRoomForm').addEventListener('submit', function(event) {
+            const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
+            if (!validateForm(this, requiredFields)) {
+                event.preventDefault();
+            }
+        });
+
+        document.getElementById('editRoomForm').addEventListener('submit', function(event) {
+            const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
+            if (!validateForm(this, requiredFields)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>

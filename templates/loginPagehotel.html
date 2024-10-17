@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="main.css" rel="stylesheet">
+</head>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f6f6f6; 
+    color: #4b3d31;
+    position: relative; 
+}
+
+.container {
+    
+    width: 400px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    text-align: center; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+    
+}
+
+.logo {
+    position: absolute;
+    top: 20px; 
+    left: 20px; 
+}
+.logo-object {
+    width: 100px;
+}
+.welcome-text {
+    font-family: 'Roboto', serif; 
+    font-size: 24px; 
+    color: #333; 
+    margin-top: 20px; 
+    margin-bottom: 20px; 
+}
+
+.login-form input {
+    padding: 12px;
+    height: 35px;
+    width: 60vh;
+    max-width: 300px;
+    border: 1px solid #b0b0b0;
+    background-color: #f0f0f0; 
+    color: #333; 
+    outline: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease; 
+}
+
+.login-form input:focus {
+    background-color: #fff; 
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3); 
+    border-color: #666; 
+}
+
+.login-form input:active {
+    background-color: #e0e0e0; 
+    transform: scale(0.98); 
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5); 
+}
+
+.login-form input::placeholder {
+    color: #666; 
+    opacity: 0.7;
+}
+
+
+.login-form {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    flex-direction: column;
+    
+}
+
+.login,
+.password {
+    align-self: center;
+    width: 60vh;
+    max-width: 300px;
+}
+
+.login-form input,
+.login-form button,
+.login-form a {
+    display: block;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.login-form a {
+    margin-top: 5px;
+    color: #202020; 
+    text-align: center;
+    font-size: 12px; 
+    transition: color 0.3s; 
+    margin-bottom: 20px;
+}
+
+.login-form a:hover {
+    color: #003950; 
+}
+
+.inButton {
+    margin-top: 10px;
+    align-self: center;
+    text-align: center;
+    padding: 10px;
+    background-color: #000; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s; 
+    width: 20vw;
+}
+
+.inButton:hover {
+    background-color: #333; 
+}
+
+.inButton:active {
+    transform: scale(0.95); 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); 
+}
+.inButtonClass {
+    display: flex;
+    justify-content: center;
+}
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #4b3d31;
+    padding: 10px 0;
+    border-top: 1px solid #ccc;
+    background-color: transparent;
+}
+.error-message {
+     color: red;
+     margin-top: 10px;
+     font-size: 13px;
+}
+    
+
+
+</style>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="{% static 'images/logo1.png' %}" alt="Logo" class="logo-object">
+        </div>
+        <h1 class="welcome-text">Добро пожаловать</h1>
+        <div class="login-form">
+          <form method="POST" action="{% url 'login' %}">
+              {% csrf_token %}
+              <input class="login" type="text" name="username" placeholder="Логин" required>
+              <input class="password" type="password" name="password" placeholder="Пароль" required>
+              <div class="inButtonClass">
+                   <button class="inButton" type="submit">Вход</button>
+              </div>
+          </form>
+          {% if error %}
+              <div class="error-message">{{ error }}</div>
+          {% endif %}
+          <a href="#" class="reset-password">Сбросить пароль</a>
+        </div>
+        <div class="footer">
+            <p>+375 (33) 656 17 25<br>hotelView@mail.com</p>
+        </div>
+    </div>
+</body>
+</html>
