@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path
 
 from hotelapp.views import login_page, admin_page, user_page, logout_view, add_user, delete_room, edit_client, \
-    add_client, evict_client, add_room, edit_room
+    add_client, evict_client, add_room, edit_room, delete_user, edit_user, report_list, create_report, delete_report
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,5 +19,10 @@ urlpatterns = [
     path('evict_client/', evict_client, name='evict_client'),
     path('add_room/', add_room, name='add_room'),
     path('edit_room/', edit_room, name='edit_room'),
+    path('delete_user/', delete_user, name='delete_user'),
+    path('edit_user/', edit_user, name='edit_user'),
+    path('reports/', report_list, name='reports'),
+    path('reports/create', create_report, name='create_report'),
+    path('delete_report', delete_report, name='delete_report'),
 
 ]

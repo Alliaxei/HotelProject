@@ -18,6 +18,7 @@
             height: 30px;
             border-radius: 10px;
             z-index: 3;
+            transition: top 0.3s ease-in-out;
         }
 
         .header h1 {
@@ -105,6 +106,16 @@
 
         .info-box-wide {
             width: 100%;
+            height: 300px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 20px;
+            color: #282828;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(153, 153, 153, 0.5);
         }
 
         .buttons {
@@ -278,7 +289,7 @@
             font-size: 24px;
         }
 
-        .edit-button {
+        .edit-button, .delete-user-button, .edit-user-button, .edit-room-button, .delete-report-button {
             background-color: #272727;
             color: #e1e1e1;
             border: none;
@@ -291,20 +302,36 @@
             margin: 3px;
         }
 
-        .edit-button:hover {
+        .edit-button:hover, .delete-user-button:hover, .edit-user-button:hover, .edit-room-button:hover, .delete-report-button:hover {
             background-color: #666666;
         }
 
-        .edit-button:active {
+        .edit-button:active, .delete-user-button:active, .edit-user-button:active, .edit-room-button:active, .delete-report-button:active {
             transform: scale(0.95);
         }
+
+        .modal-content-delete {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           align-items: center;
+           text-align: center;
+        }
+
     </style>
 </head>
 <body>
+    {% if messages %}
+        <script>
+            {% for message in messages %}
+                alert("{{ message }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+
     <header class="header">
         <a href="/" class="left">На главную</a>
         <h1 class="center">Панель администратора</h1>
-        <a href="/logout" class="right">Выйти из аккаунта</a>
     </header>
     <main>
         <section>
@@ -334,7 +361,7 @@
                                         <td>{{ item.numberOfSeats }}</td>
                                         <td>{{ item.get_category_display }}</td>
                                         <td>
-                                            <button class="edit-button" data-room-id="{{ item.id }}">Редактировать</button>
+                                            <button  class="edit-room-button" data-room-id="{{ item.id }}">Редактировать</button>
                                             <form action="{% url 'delete_room' item.id %}" method="post" style="display: inline;">
                                                 {% csrf_token %}
                                                 <button type="submit" class="edit-button">Удалить</button>
@@ -361,7 +388,7 @@
                             <thead>
                                 <tr>
                                     <th>Логин</th>
-                                    <th>Права администратора</th>
+                                    <th>Расширенные права</th>
                                     <th>Действия</th>
                                 </tr>
                             </thead>
@@ -370,7 +397,10 @@
                                     <tr>
                                         <td>{{ item.login }}</td>
                                         <td>{{ item.is_superuser|yesno:"Да,Нет" }}</td>
-                                        <td></td>
+                                        <td>
+                                            <button class="edit-user-button" data-user-id="{{ item.id }}" data-user-password="{{ item.password }}">Редактировать</button>
+                                            <button class="delete-user-button" data-user-id="{{ item.id }}">Удалить</button>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -383,25 +413,74 @@
             </div>
         </section>
 
-        <section>
+      <section>
             <h2 class="sectionHeader">Отчёты</h2>
             <div class="info-section">
-                <div class="info-box info-box-wide">
-                    <p>Статистика использования номеров (данные из БД)</p>
+                <div class="info-box-wide">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Количество клиентов</th>
+                                    <th>Количество занятых комнат</th>
+                                    <th>Предпочтения</th>
+                                    <th>Дата создания</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                    <tr>
+                                        <td>{{ report.count_of_clients }}</td>
+                                        <td>{{ report.count_of_rooms }}</td>
+                                        <td>{{ report.preferencies }}</td>
+                                        <td>{{ report.dateOfCreation }}</td>
+                                         <td>
+                                            <form action="{% url 'delete_report' %}" method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="report_id" value="{{ report.id }}"></input>
+                                                <button class="delete-report-button" type="submit">Удалить</button>
+                                            </form>
+                                            
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">Нет данных для отображения</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
+
     </main>
 
+     <!-- Modal for deleting a user -->
+      <div id="deleteUserAccept" class="modal">
+            <div class="modal-content modal-content-delete">
+                <span class="close">&times;</span>
+                <h2 class="form-header" id="text-header-name">Удаление сотрудника</h2>
+                    <form action="{% url 'delete_user' %}" method='post' style='display:inline;'>
+                        {% csrf_token %}
+                        <label style="margin: 10px;">Вы уверены?</label><br>
+                        <input type="hidden" name="user_id" id="deleteUserId"></input>
+                        <button style="margin: 10px;" type="submit">Удалить</button>
+                    </form>
+            </div>
+      </div>
     <!-- Modal for adding a user -->
     <div id="addUserModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2 class="form-header">Добавление нового пользователя</h2>
-            <form id="addUserForm">
+            <h2 class="form-header">Добавление нового сотрудника</h2>
+             <form id="addUserForm" action="{% url 'add_user' %}" method="post">
+             {% csrf_token %}
                 <input type="text" id="login" name="login" placeholder="Введите логин"><br><br>
                 <input type="password" id="password" name="password" placeholder="Введите пароль"><br><br>
-                <label for="is_superuser">Права администратора:</label>
+                <label for="is_superuser">Расширенные права</label>
                 <select id="is_superuser" name="is_superuser">
                     <option value="true">Да</option>
                     <option value="false">Нет</option>
@@ -412,17 +491,23 @@
     </div>
 
     <!-- Modal for adding a room -->
-<div id="addRoomModal" class="modal">
+    <div id="addRoomModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2 class="form-header">Добавление нового номера</h2>
         <form id="addRoomForm" method="post" action="{% url 'add_room' %}">
             {% csrf_token %}
-            <input type="number" id="add-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
+            <input type="number" inputmode="numeric" id="add-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
             <input type="text" id="add-building" name="building" placeholder="Введите корпус" required><br><br>
-            <input type="number" id="add-floor" name="floor" placeholder="Введите этаж" required><br><br>
-            <input type="text" id="add-bathroom-type" name="bathRoomType" placeholder="Введите тип узла" required><br><br>
-            <input type="number" id="add-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
+            <input type="number" inputmode="numeric" id="add-floor" name="floor" placeholder="Введите этаж" required><br><br>
+            
+            <label for="add-bathroom-type">Тип узла:</label>
+            <select id="add-bathroom-type" name="bathRoomType" required>
+                <option value="Общий">Общий</option>
+                <option value="Личный">Личный</option>
+            </select><br><br>
+            
+            <input type="number" inputmode="numeric" id="add-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
             <label for="add-room-category">Категория:</label>
             <select id="add-room-category" name="room_category" required>
                 <option value="economy">Эконом</option>
@@ -452,11 +537,17 @@
             <form id="editRoomForm" method="post" action="{% url 'edit_room' %}">
                 {% csrf_token %}
                 <input type="hidden" id="edit-room-id" name="room_id">
-                <input type="text" id="edit-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
+                <input type="number" inputmode="numeric" id="edit-room-number" name="room_number" placeholder="Введите номер комнаты" required><br><br>
                 <input type="text" id="edit-building" name="building" placeholder="Введите корпус" required><br><br>
-                <input type="text" id="edit-floor" name="floor" placeholder="Введите этаж" required><br><br>
-                <input type="text" id="edit-bathroom-type" name="bathRoomType" placeholder="Введите тип узла" required><br><br>
-                <input type="number" id="edit-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
+                <input type="number" inputmode="numeric" id="edit-floor" name="floor" placeholder="Введите этаж" required><br><br>
+                
+                <label for="edit-bathroom-type">Тип узла:</label>
+                <select id="edit-bathroom-type" name="bathRoomType" required>
+                    <option value="Общий">Общий</option>
+                    <option value="Личный">Личный</option>
+                </select><br><br>
+                
+                <input type="number" inputmode="numeric" id="edit-number-of-seats" name="numberOfSeats" placeholder="Введите количество мест" required><br><br>
                 <label for="edit-room-category">Категория:</label>
                 <select id="edit-room-category" name="room_category" required>
                     <option value="economy">Эконом</option>
@@ -467,101 +558,239 @@
             </form>
         </div>
     </div>
+    
+    <!-- Modal for editing a user -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="form-header">Редактирование сотрудника</h2>
+             <form id="editUserForm" action="{% url 'edit_user' %}" method="post">
+             {% csrf_token %}
+                <input type="hidden" id="edit-user-id" name="user_id">
+                <input type="text" id="edit-login" name="login" placeholder="Введите логин"><br><br>
+                <label for="edit-is-superuser">Расширенные права</label>
+                <select id="edit-is-superuser" name="is_superuser">
+                    <option value="true">Да</option>
+                    <option value="false">Нет</option>
+                </select><br><br>
+                <button type="submit" id="submitButtonEditUser" >Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         function toggleModal(modal, action) {
             modal.style.display = action;
         }
 
-        function validateForm(form, fields) {
-            let formIsValid = true;
-            fields.forEach(field => {
-                if (!form[field].value.trim()) {
-                    formIsValid = false;
-                    alert(`Поле ${field} не может быть пустым!`);
-                }
-            });
-            return formIsValid;
-        }
-
-        const addRoomModal = document.getElementById('addRoomModal');
-        const editRoomModal = document.getElementById('editRoomModal');
-        const submitButtonRoom = document.getElementById('submitButtonRoom');
-        const submitButtonEditRoom = document.getElementById('submitButtonEditRoom');
-        
-        const addRoomInputs = document.querySelectorAll("#addRoomForm input, #addRoomForm select");
-        const editRoomInputs = document.querySelectorAll("#editRoomForm input, #editRoomForm select");
-
-        document.getElementById('addRoomButton').addEventListener('click', function() {
-            toggleModal(addRoomModal, 'block');
-            validateAddRoomForm();
-        });
-
-        const closeButtons = document.querySelectorAll('.close');
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                toggleModal(addRoomModal, 'none');
-                toggleModal(editRoomModal, 'none');
-            });
-        });
-
-        window.addEventListener('click', function(event) {
-            if (event.target === addRoomModal) {
-                toggleModal(addRoomModal, 'none');
-            }
-            if (event.target === editRoomModal) {
-                toggleModal(editRoomModal, 'none');
+    function validateForm(form, fields) {
+        let formIsValid = true;
+        fields.forEach(field => {
+            if (!form[field].value.trim()) {
+                formIsValid = false;
+                alert(`Поле ${field} не может быть пустым!`);
             }
         });
+        return formIsValid;
+    }
 
-        document.querySelectorAll('.edit-button').forEach(button => {
-            button.addEventListener('click', function(event) {
-                toggleModal(editRoomModal, 'block');
+    const addUserModal = document.getElementById('addUserModal');
+    const editUserModal = document.getElementById('editUserModal');
 
-                const roomId = button.getAttribute('data-room-id');
-                document.getElementById('edit-room-id').value = roomId;
+    document.getElementById('addUserButton').addEventListener('click', function() {
+        toggleModal(addUserModal, 'block');
+        validateAddUserForm();
+    });
+    
+    const addRoomModal = document.getElementById('addRoomModal');
+    const editRoomModal = document.getElementById('editRoomModal');
+    const submitButtonRoom = document.getElementById('submitButtonRoom');
+    const submitButtonEditRoom = document.getElementById('submitButtonEditRoom');
+    const submitButtonAddUser = document.getElementById('submitButton');
+    const submitButtonEditUser = document.getElementById('submitButtonEditUser');
 
-                // Здесь можно загрузить и заполнить остальные поля формы, используя AJAX
-                // Например:
-                // fetch(`/get_room_data/${roomId}`)
-                //     .then(response => response.json())
-                //     .then(data => {
-                //         document.getElementById('edit-room-number').value = data.room_number;
-                //         // Заполните остальные поля...
-                //     });
+    const addRoomInputs = document.querySelectorAll("#addRoomForm input, #addRoomForm select");
+    const editRoomInputs = document.querySelectorAll("#editRoomForm input, #editRoomForm select");
+    const addUserInputs = document.querySelectorAll("#addUserForm input, #addUserForm select");
+    const editUserInputs = document.querySelectorAll("#editUserForm input, #editUserForm select");
 
-                validateEditRoomForm();
-            });
-        });
+    const deleteUserModal = document.getElementById('deleteUserAccept');
+    const deleteUserForm = deleteUserModal.querySelector('form');
+    const submitButtonDeleteUser = deleteUserForm.querySelector('button[type="submit"]');
 
-        function validateAddRoomForm() {
-            let allFilled = Array.from(addRoomInputs).every(input => input.value.trim());
-            submitButtonRoom.disabled = !allFilled;
-        }
+    const deleteUserInputs = document.querySelectorAll("#deleteUserForm input, #deleteUserForm select");
 
-        addRoomInputs.forEach(input => input.addEventListener('input', validateAddRoomForm));
+    document.getElementById('addRoomButton').addEventListener('click', function() {
+        toggleModal(addRoomModal, 'block');
+        validateAddRoomForm();
+    });
 
-        function validateEditRoomForm() {
-            let allFilled = Array.from(editRoomInputs).every(input => input.value.trim());
-            submitButtonEditRoom.disabled = !allFilled;
-        }
-
-        editRoomInputs.forEach(input => input.addEventListener('input', validateEditRoomForm));
-
-        document.getElementById('addRoomForm').addEventListener('submit', function(event) {
-            const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
-            if (!validateForm(this, requiredFields)) {
-                event.preventDefault();
-            }
-        });
-
-        document.getElementById('editRoomForm').addEventListener('submit', function(event) {
-            const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
-            if (!validateForm(this, requiredFields)) {
-                event.preventDefault();
-            }
+    const closeButtons = document.querySelectorAll('.close');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            toggleModal(addRoomModal, 'none');
+            toggleModal(editRoomModal, 'none');
+            toggleModal(addUserModal, 'none');
+            toggleModal(editUserModal, 'none');
+            toggleModal(deleteUserModal, 'none');
         });
     });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === addRoomModal) {
+            toggleModal(addRoomModal, 'none');
+        }
+        if (event.target === editRoomModal) {
+            toggleModal(editRoomModal, 'none');
+        }
+        if (event.target === deleteUserModal) {
+            toggleModal(deleteUserModal, 'none');
+        }
+        if (event.target === addUserModal) {
+            toggleModal(addUserModal, 'none');
+        }
+        if (event.target === editUserModal) {
+            toggleModal(editUserModal, 'none');
+        }
+    });
+
+    document.querySelectorAll('.delete-user-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            toggleModal(deleteUserModal, 'block');
+            const userId = button.getAttribute('data-user-id');
+            document.getElementById('deleteUserId').value = userId;
+        });
+    });
+    
+    
+
+   document.querySelectorAll('.edit-room-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            // Открываем модальное окно
+            toggleModal(editRoomModal, 'block');
+    
+            // Получаем значения из атрибутов и строки таблицы
+            const roomId = button.getAttribute('data-room-id');
+            const tr = button.closest('tr');
+            const roomNumber = tr.children[0].textContent.trim();
+            const building = tr.children[1].textContent.trim();
+            const floor = tr.children[2].textContent.trim();
+            const bathRoomType = tr.children[3].textContent.trim();
+            const numberOfSeats = tr.children[4].textContent.trim();
+            const roomCategory = tr.children[5].textContent.trim();
+    
+            // Назначаем значения элементам формы
+            document.getElementById('edit-room-id').value = roomId;
+            document.getElementById('edit-room-number').value = roomNumber;
+            document.getElementById('edit-building').value = building;
+            document.getElementById('edit-floor').value = floor;
+    
+            // Присваиваем значение для выпадающего списка "Тип узла"
+            document.getElementById('edit-bathroom-type').value = bathRoomType;
+    
+            // Проверяем значение количества мест
+            console.log('Number of Seats:', numberOfSeats);
+            document.getElementById('edit-number-of-seats').value = numberOfSeats;
+    
+            // Присваиваем значение для выпадающего списка "Категория"
+            document.getElementById('edit-room-category').value = roomCategory;
+            
+              if (roomCategory === 'эконом') {
+            document.getElementById('edit-room-category').value = 'economy';
+            } else if (roomCategory === 'стандарт') {
+                document.getElementById('edit-room-category').value = 'standart';
+            } else if (roomCategory === 'люкс') {
+                document.getElementById('edit-room-category').value = 'luxury';
+            }
+            // Вызываем функцию валидации формы
+            validateEditRoomForm();
+        });
+    });
+
+    document.querySelectorAll('.edit-user-button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            toggleModal(editUserModal, 'block');
+            const userId = button.getAttribute('data-user-id');
+            const userPassword = button.getAttribute('data-user-password');
+            const tr = button.closest('tr');
+            const login = tr.children[0].textContent.trim();
+            const isSuperuser = tr.children[1].textContent.trim().toLowerCase() === 'да' ? 'True' : 'False';
+
+            document.getElementById('edit-user-id').value = userId;
+            document.getElementById('edit-login').value = login;
+            document.getElementById('edit-is-superuser').value = isSuperuser;
+            console.log("psw " + userPassword);
+            console.log("psw ");
+            document.getElementById('edit_user_password').value = userPassword;
+            //validateEditUserForm();
+        });
+    });
+
+    function validateAddRoomForm() {
+        let allFilled = Array.from(addRoomInputs).every(input => input.value.trim());
+        submitButtonRoom.disabled = !allFilled;
+    }
+
+   function restrictNumericInput(event) {
+       const keyCode = event.which ? event.which : event.keyCode;
+       if (!(keyCode >= 48 && keyCode <= 57) && keyCode !== 8) {
+           event.preventDefault();
+       }
+   }
+
+    document.getElementById('add-room-number').addEventListener('keypress', restrictNumericInput);
+    document.getElementById('add-floor').addEventListener('keypress', restrictNumericInput);
+    document.getElementById('add-number-of-seats').addEventListener('keypress', restrictNumericInput);
+
+    document.getElementById('edit-room-number').addEventListener('keypress', restrictNumericInput);
+    document.getElementById('edit-floor').addEventListener('keypress', restrictNumericInput);
+    document.getElementById('edit-number-of-seats').addEventListener('keypress', restrictNumericInput);
+
+    addRoomInputs.forEach(input => input.addEventListener('input', validateAddRoomForm));
+
+    function validateEditRoomForm() {
+        let allFilled = Array.from(editRoomInputs).every(input => input.value.trim());
+        submitButtonEditRoom.disabled = !allFilled;
+    }
+
+    editRoomInputs.forEach(input => input.addEventListener('input', validateEditRoomForm));
+
+    function validateAddUserForm() {
+        let allFilled = Array.from(addUserInputs).every(input => input.value.trim());
+        submitButtonAddUser.disabled = !allFilled;
+    }
+
+    addUserInputs.forEach(input => input.addEventListener('input', validateAddUserForm));
+
+    //function validateEditUserForm() {
+       // let allFilled = Array.from(editUserInputs).every(input => input.value.trim());
+       //  console.log('All fields filled:', allFilled);
+      //  submitButtonEditUser.disabled = !allFilled;
+    //}
+
+    //editUserInputs.forEach(input => input.addEventListener('input', validateEditUserForm));
+
+    document.getElementById('addRoomForm').addEventListener('submit', function(event) {
+        const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
+        if (!validateForm(this, requiredFields)) {
+            event.preventDefault();
+        }
+    });
+
+    document.getElementById('editRoomForm').addEventListener('submit', function(event) {
+        const requiredFields = ['room_number', 'building', 'floor', 'bathRoomType', 'numberOfSeats', 'room_category'];
+        if (!validateForm(this, requiredFields)) {
+            event.preventDefault();
+        }
+    });
+
+    document.getElementById('editUserForm').addEventListener('submit', function(event) {
+        const requiredFields = ['login', 'is_superuser'];
+        if (!validateForm(this, requiredFields)) {
+            event.preventDefault();
+        }
+    });
+});
 </script>
 </body>
 </html>

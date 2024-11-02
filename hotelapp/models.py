@@ -15,6 +15,7 @@ class Room(models.Model):
         ('standart', 'Стандарт'),
         ('luxury', 'Люкс'),
     ], default='economy')
+    is_occupied = models.BooleanField(default=False)
 
 
     def __str__(self):
@@ -28,7 +29,6 @@ class Room(models.Model):
     def get_category_display(self):
         category_dict = dict(self._meta.get_field('room_category').choices) #Преобразование списка кортежей в словарь
         return category_dict.get(self.room_category, self.room_category) # Возвращение значения по ключу
-
 
 class Client(models.Model):
     name = models.CharField(max_length=255)
@@ -64,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -80,3 +81,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return self.is_superuser
+
+class Invoice(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return (f'Счёт: {self.client.id}, Клиент: {self.client.name}, Сумма: {self.amount} рублей')
+
+class Report(models.Model):
+    count_of_clients = models.IntegerField(default=0)
+    count_of_rooms = models.IntegerField(default=0)
+    preferencies = models.CharField(max_length=100)
+    dateOfCreation = models.DateField(default=date.today)
+
+    def __str__(self):
+        return f'Report for {self.client_name}'
+
